@@ -1,0 +1,64 @@
+#!/usr/bin/env php
+<?php
+/**
+ * @author: Ali Kenan Yağmur
+ * Date: 25.03.2016
+ * Time: 18:42
+ */
+require __DIR__.'/vendor/autoload.php';
+
+define("MIGRATIONS", __DIR__."/database/Migrations");
+define("SEEDS", __DIR__."/database/Seeds");
+
+class QuickS {
+
+    public function __construct($args)
+    {
+        $this->args = $args;
+    }
+
+    public function run()
+    {
+        switch ($this->args[1]){
+            case "migrate":
+                $this->migrate();
+                break;
+            case "seed":
+                $this->seed();
+                break;
+        }
+    }
+
+    public function migrate()
+    {
+        $files = glob(MIGRATIONS.'/*.php');
+        $this->install($files);
+    }
+
+    public function seed()
+    {
+        $files = glob(SEEDS.'/*.php');
+        $this->install($files);
+    }
+
+    private function install($files)
+    {
+        if(!count($files)) {
+            print "File not found \n";
+            die;
+        }
+
+        foreach ($files as $file) {
+            require_once $file;
+
+            $className = basename($file,'.php');
+
+            $class = new $className;
+            $class->run();
+        }
+    }
+
+}
+
+$quicks = new QuickS($argv);
+$quicks->run();
